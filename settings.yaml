@@ -1,0 +1,42 @@
+SalesforceService:
+  Db:
+    LogsConnString:
+      settings-key: SalesforceService-LogsConnString
+      types: [ AzureTableStorage, Tag ]
+    DataConnString:
+      settings-key: SalesforceService-DataConnString
+      types: [ AzureTableStorage, Tag ]
+  SagasRabbitMq:
+    RabbitConnectionString:
+      settings-key: RabbitSagas
+      types: [ RabbitMq, Tag ]
+    RetryDelay:
+      settings-key: SagaRetryDelay
+      types: [ Tag ]
+  Api:
+    ClientId:
+      settings-key: SalesforceService-Api-ClientId
+      types: [ Tag ]
+    ClientSecret:
+      settings-key: SalesforceService-Api-ClientSecret
+      types: [ Tag ]
+    Username:
+      settings-key: SalesforceService-Api-Username
+      types: [ Tag ]
+    Password:
+      settings-key: SalesforceService-Api-Password
+      types: [ Tag ]
+    SecurityToken:
+      settings-key: SalesforceService-Api-SecurityToken
+      types: [ Tag ]
+SlackNotifications:
+  AzureQueue:
+    ConnectionString:
+      settings-key: SlackNotificationsConnString
+      types: [ AzureTableStorage ]
+    QueueName:
+      settings-key: SlackQueueName
+MonitoringServiceClient:
+  MonitoringServiceUrl:
+    settings-key: MonitoringServiceUrl
+
