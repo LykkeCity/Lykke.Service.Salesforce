@@ -8,10 +8,13 @@ using Lykke.Cqrs.Configuration;
 using Lykke.Messaging;
 using Lykke.Messaging.RabbitMq;
 using Lykke.Messaging.Serialization;
+using Lykke.Service.Registration.Contract;
+using Lykke.Service.Registration.Contract.Events;
 using Lykke.Service.Salesforce.Contract;
 using Lykke.Service.Salesforce.Contract.Commands;
 using Lykke.Service.Salesforce.Settings;
 using Lykke.Service.Salesforce.Workflow.CommandHandlers;
+using Lykke.Service.Salesforce.Workflow.Sagas;
 using Lykke.SettingsReader;
 
 namespace Lykke.Service.Salesforce.Modules
@@ -29,6 +32,7 @@ namespace Lykke.Service.Salesforce.Modules
         protected override void Load(ContainerBuilder builder)
         {
             string commandsRoute = "commands";
+            string eventsRoute = "events";
             
             MessagePackSerializerFactory.Defaults.FormatterResolver = MessagePack.Resolvers.ContractlessStandardResolver.Instance;
             var rabbitMqSagasSettings = new RabbitMQ.Client.ConnectionFactory { Uri = _settings.CurrentValue.SalesforceService.SagasRabbitMq.RabbitConnectionString };
@@ -38,6 +42,8 @@ namespace Lykke.Service.Salesforce.Modules
             builder.RegisterType<SalesforceCommandsHandler>()
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.SalesforceService.SagasRabbitMq.RetryDelay))
                 .SingleInstance();
+
+            builder.RegisterType<RegistrationSaga>().SingleInstance();
 
             builder.Register(ctx =>
                 {
@@ -71,6 +77,12 @@ namespace Lykke.Service.Salesforce.Modules
                         new DefaultEndpointProvider(),
                         true,
                         Register.DefaultEndpointResolver(sagasEndpointResolver),
+                        
+                        Register.Saga<RegistrationSaga>("salesforce-registration-saga")
+                            .ListeningEvents(typeof(ClientRegisteredEvent))
+                            .From(RegistrationBoundedContext.Name).On(eventsRoute)
+                            .WithEndpointResolver(sagasEndpointResolver)
+                            .ProcessingOptions(eventsRoute).MultiThreaded(2).QueueCapacity(256),    
 
                         Register.BoundedContext(SalesforceBoundedContext.Name)
                             .ListeningCommands(commands)

@@ -70,14 +70,7 @@ namespace Lykke.Service.Salesforce.DomainServices
 
                 if (!string.IsNullOrEmpty(contactId))
                 {
-                    await _forceClient.UpdateAsync(ContactObjName, contactId, new
-                    {
-                        FirstName = request.FirstName,
-                        LastName = request.LastName,
-                        Phone = request.Phone,
-                        MailingCountry = request.Country,
-                        sub_Id__c = request.ClientId
-                    });
+                    await _forceClient.UpdateAsync(ContactObjName, contactId, request.Properties);
                 }
             });
         }

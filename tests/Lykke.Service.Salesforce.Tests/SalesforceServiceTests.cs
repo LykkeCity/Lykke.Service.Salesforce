@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AzureStorage.Tables;
 using Lykke.Logs;
@@ -27,16 +28,18 @@ namespace Lykke.Service.Salesforce.Tests
             
             var service = new SalesforceService(settings, new AuthenticationClient(), repository, EmptyLogFactory.Instance);
 
-            await service.CreateContactAsync("test@test.com", null);
+            await service.CreateContactAsync("test1@test.com", null);
             await service.UpdateContactAsync(new UpdateContactInfoRequest
             {
-                Email = "test@test.com",
+                Email = "test1@test.com",
                 PartnerId = null,
-                FirstName = "Name",
-                LastName = "Lastname",
-                Country = "RUS",
-                Phone = "12345",
-                ClientId = Guid.NewGuid().ToString()
+                Properties = new Dictionary<string, string>
+                {
+                    { "FirstName", "FirstName" },
+                    { "LastName", "Lastname" },
+                    { "Phone", "7777" },
+                    { "MailingCountry", "RUS" },
+                }
             });
         }
     }
