@@ -17,7 +17,7 @@ namespace Lykke.Service.Salesforce.Services
         
         public Task StartAsync()
         {
-            _cqrsEngine.Start();
+            _cqrsEngine.StartAll();
 
             return Task.CompletedTask;
         }
