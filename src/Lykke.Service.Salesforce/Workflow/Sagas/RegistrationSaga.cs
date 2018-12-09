@@ -41,19 +41,31 @@ namespace Lykke.Service.Salesforce.Workflow.Sagas
                     _log.Warning(nameof(ClientRegisteredEvent), "ClientId can't be empty");
                     return;
                 }
-                
-                await _salesforceService.UpdateContactAsync(new UpdateContactInfoRequest
+
+                var properties = new Dictionary<string, string>()
                 {
-                    Email = evt.Email,
-                    Properties = new Dictionary<string, string>()
+                    {"FirstName", evt.FirstName},
+                    {"LastName", evt.LastName},
+                    {"Phone", evt.Phone},
+                    {"MailingCountry", evt.CountryFromPOA},
+                    {"sub_Id__c", evt.ClientId}
+                };
+                
+                string contactId = await _salesforceService.GetContactIdAsync(evt.Email, null);
+
+                if (string.IsNullOrEmpty(contactId))
+                {
+                    await _salesforceService.CreateContactAsync(evt.Email, null, properties);
+                }
+                else
+                {
+                    await _salesforceService.UpdateContactAsync(new UpdateContactInfoRequest
                     {
-                        { "FirstName", evt.FirstName },
-                        { "LastName", evt.LastName },
-                        { "Phone", evt.Phone },
-                        { "MailingCountry", evt.CountryFromPOA },
-                        { "sub_Id__c", evt.ClientId }
-                    }
-                });
+                        Email = evt.Email,
+                        Properties = properties
+                    });
+                }
+                
             }
             catch (Exception e)
             {

@@ -34,8 +34,11 @@ namespace Lykke.Service.Salesforce.Workflow.CommandHandlers
                     _log.Warning(nameof(CreateContactCommand), "Invalid email");
                     return CommandHandlingResult.Ok();
                 }
+
+                string clientId = await _salesforceService.GetContactIdAsync(command.Email, command.PartnerId);
                 
-                await _salesforceService.CreateContactAsync(command.Email, command.PartnerId);
+                if (string.IsNullOrEmpty(clientId))
+                    await _salesforceService.CreateContactAsync(command.Email, command.PartnerId);
             }
             catch (Exception e)
             {

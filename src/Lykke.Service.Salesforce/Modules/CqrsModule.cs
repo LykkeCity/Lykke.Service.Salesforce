@@ -76,6 +76,7 @@ namespace Lykke.Service.Salesforce.Modules
                         messagingEngine,
                         new DefaultEndpointProvider(),
                         true,
+                        false,
                         Register.DefaultEndpointResolver(sagasEndpointResolver),
                         
                         Register.Saga<RegistrationSaga>("salesforce-registration-saga")

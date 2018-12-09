@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Common;
 using Common.Log;
 using Lykke.Common.Log;
 using Lykke.Service.Salesforce.Domain;
@@ -37,19 +37,16 @@ namespace Lykke.Service.Salesforce.DomainServices
             _log = logFactory.CreateLog(this);
         }
         
-        public Task CreateContactAsync(string email, string partnerId)
+        public Task CreateContactAsync(string email, string partnerId, Dictionary<string, string> properties = null)
         {
             return CallAsync(async () =>
             {
-                var contactId = await _contactsRepository.GetContactIdByEmailAsync(email, partnerId);
-                
-                if (!string.IsNullOrEmpty(contactId))
-                {
-                    _log.Warning(nameof(CreateContactAsync), "Contact already exists", context: new { email = email.SanitizeEmail(), partnerId });
-                    return;
-                }
-                
-                var response = await _forceClient.CreateAsync(ContactObjName, new { LastName = "not set", Email = email });
+                var response = await _forceClient.CreateAsync(ContactObjName,
+                    properties ?? new Dictionary<string, string>
+                    {
+                        {"LastName", "not set"},
+                        {"Email", email}
+                    });
                 
                 if (response.Success)
                 {
@@ -73,6 +70,11 @@ namespace Lykke.Service.Salesforce.DomainServices
                     await _forceClient.UpdateAsync(ContactObjName, contactId, request.Properties);
                 }
             });
+        }
+
+        public Task<string> GetContactIdAsync(string email, string partnerId)
+        {
+            return _contactsRepository.GetContactIdByEmailAsync(email, partnerId);
         }
 
         private async Task CallAsync(Func<Task> action)
